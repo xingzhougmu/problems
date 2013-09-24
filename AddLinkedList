@@ -1,0 +1,207 @@
+// interview.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stddef.h>
+
+using namespace std;
+
+struct node {
+	char data;
+	node *next;
+	node(char data){
+		this->data = data;
+		this->next = NULL;
+	}
+	node(node * newNode){
+		this->data = newNode->data;
+		this->next = newNode->next;
+	}
+	node(){
+		this->next = NULL;
+	}
+};
+
+node* createSingleLinkedList(size_t length);
+void printList(node *head);
+void insert(node** head, int data);
+void insert(node** head, int data, int pos);
+void del(node** head, int pos);
+
+node* createSingleLinkedList(size_t length){
+	srand(time(NULL));
+	node* head = NULL;
+	node* oldNode = NULL;
+	for (int i=0; i<length; i++){
+		char data = rand();
+		//cout << data << endl;
+		node* newNode = new node(i+1);
+		if (head == NULL){
+			head = newNode;
+			oldNode = head;
+		}
+		else{
+			oldNode->next = newNode;
+			oldNode = oldNode->next;
+		}
+	}
+	//oldNode->next = NULL;
+	return head;
+}
+
+void printList(node *head){
+	node* iterateNode = head;
+	if (head == NULL)
+		return;
+	do{
+		cout << (unsigned int)iterateNode->data << " ";
+	}while ((iterateNode = iterateNode->next) != NULL);
+	cout<<endl;
+}
+
+void insert(node** head, int data, int pos){
+	if (pos == 0){
+		insert(head, data);
+		return;
+	}
+	node* current = *head;
+	node* insertNode = new node(data);
+	while(--pos > 0 && current->next != NULL){
+		current = current->next;
+	}
+	insertNode->next = (current->next != NULL) ? current->next : NULL;
+	current->next = insertNode;
+}
+
+void insert(node** head, int data){
+	node* newNode = new node(data);
+	if (*head != NULL)
+		newNode->next = *head;
+	*head = newNode;
+}
+
+void del(node** head, int pos){
+	if (pos == 0){
+		*head = (*head)->next;
+		return;
+	}
+	node* current = *head;
+	node* pre = *head;
+	while (--pos >= 0 && current->next != NULL){
+		pre = current;
+		current = current->next;
+	}
+	pre->next = current->next;
+}
+
+void reverse(node** head){
+	node* tmp = *head;
+	node* newHead = NULL;
+	while(tmp!=NULL){
+		insert(&newHead, tmp->data);
+		tmp = tmp->next;
+	}
+	*head = newHead;
+}
+
+// reference: http://hawstein.com/posts/add-singly-linked-list.html
+node* MakeLinkedList(int d[], size_t n){
+	node* head = new node();
+	head->data = (char)d[0];
+	node* curr = head;
+	node* pre = head;
+	for(int i=1; i<n; ++i){
+		curr = new node((char)d[i]);
+		pre->next = curr;
+		pre = curr;
+	}
+	return head;
+}
+
+// reference: http://hawstein.com/posts/add-singly-linked-list.html
+node* addLinkedList(node* q1, node* q2){
+	int first = q1->data + q2->data;
+	node* result = new node(first);
+
+	node* pre = result;
+	node* q = result;
+	node* p = result;
+	while((q1=q1->next) && (q2=q2->next)){
+		q = new node();
+		pre->next = q;
+		char num = q1->data + q2->data;
+		q->data = num % 10;
+		if (num > 9){
+			p->data = p->data + 1;
+			for(p=p->next; p!=q; p=p->next)
+				p->data = 0;
+		}
+		else if (num < 9)
+			p = q;
+		pre = q;
+	}
+
+	if (result->data > 9){
+		q = new node();
+		q->data = 1;
+		result->data = result->data - 10;
+		q->next = result;
+		result = q;
+	}
+	return result;
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+	node* list = createSingleLinkedList(10);
+	printList(list);
+
+	// insert test
+	insert(&list,20);
+	printList(list);
+
+	insert(&list, 30, 1);
+	printList(list);
+
+	insert(&list, 25, 30);
+	printList(list);
+
+	insert(&list, 25, 0);
+	printList(list);
+
+	//del test
+	del(&list, 1);
+	printList(list);
+
+	del(&list, 0);
+	printList(list);
+
+	del(&list, 30);
+	printList(list);
+
+	//reverse test
+	reverse(&list);
+	printList(list);
+
+	// add two linked list
+	int n = 7;
+	int a[] = {2,0,0,0,7,0,1};
+	int b[] = {7,9,9,9,9,9,9};
+
+	node* q1 = MakeLinkedList(a, n);
+	node* q2 = MakeLinkedList(b, n);
+
+	node* result = addLinkedList(q1,q2);
+	printList(q1);
+	printList(q2);
+	printList(result);
+
+	int pause;
+	cin >> pause;
+
+	return 0;
+}
